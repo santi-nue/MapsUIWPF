@@ -45,6 +45,7 @@ namespace MapsUIWPF
             // Add the tile layer (base map)
             var tileLayer = OpenStreetMap.CreateTileLayer();
             map.Layers.Add(tileLayer);
+            Layers.Layers.Add(tileLayer.Name);
 
             // Define pan and zoom limits here if necessary
             var (minX, minY) = SphericalMercator.FromLonLat(-180, -85.0511);
@@ -58,10 +59,12 @@ namespace MapsUIWPF
 
             // Add the error ellipse layer
             var errorEllipseLayer = CreateErrorEllipseLayer(-105.2705, 39.7392, 100, 50, 45); // Example values
-            errorEllipseLayer.Opacity = 0.5;
+            errorEllipseLayer.Opacity = 0.05;
 
-            map.Layers.Add(errorEllipseLayer);
             
+            map.Layers.Add(errorEllipseLayer);
+            Layers.Layers.Add(errorEllipseLayer.Name);
+
 
             return Task.FromResult(map);
         }
