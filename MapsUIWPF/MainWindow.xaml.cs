@@ -2,17 +2,21 @@
 using Mapsui.Extensions;
 using Mapsui.Layers;
 using Mapsui.Limiting;
+using Mapsui.Nts.Extensions;
 using Mapsui.Projections;
 using Mapsui.Providers;
 using Mapsui.Styles;
 using Mapsui.Tiling;
 using Mapsui.UI.Wpf;
+
 using MapsUIWPF.Data.Tools;
 using MapsUIWPF.Windows;
 using Microsoft.Win32;
+using NetTopologySuite.Geometries;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+
 
 namespace MapsUIWPF
 {
@@ -30,7 +34,8 @@ namespace MapsUIWPF
             // Initialize the map asynchronously
             InitializeMapAsync();
 
-            MapView.Map.Refresh();
+            
+            
         }
 
         public Task<Map> CreateMapAsync()
@@ -51,20 +56,19 @@ namespace MapsUIWPF
             map.Navigator.OverridePanBounds = worldBounds;
             map.Navigator.ZoomToBox(worldBounds);
 
-            
-            // Add layer names to the LayersList
-            foreach(var layer in map.Layers)
-            {
-                MessageBox.Show($"Found layer: {layer.Name}");
+            // Add the error ellipse layer
+            var errorEllipseLayer = CreateErrorEllipseLayer(-105.2705, 39.7392, 100, 50, 45); // Example values
+            errorEllipseLayer.Opacity = 0.5;
 
-                if(layer.Name != null)
-                    Layers.Layers.Add(layer.Name);
-            }
+            map.Layers.Add(errorEllipseLayer);
             
-            // Attach event handler for map zoom changes
-            map.Navigator.ViewportChanged += Event_ViewPortChanged;
 
             return Task.FromResult(map);
+        }
+
+        private void MapLayerCreate(object? sender, EventArgs e)
+        {
+
         }
 
         private async void InitializeMapAsync()
@@ -149,6 +153,58 @@ namespace MapsUIWPF
         {
         }
 
+        private static ILayer CreateErrorEllipseLayer(double lon, double lat, double semiMajorAxis, 
+            double semiMinorAxis, double orientationAngle)
+        {
+            double centerX = SphericalMercator.FromLonLat(lon, lat).x;
+            double centerY = SphericalMercator.FromLonLat(lon, lat).y;
+
+            double majorAxisMeters = semiMajorAxis * 1000;
+            double minorAxisMeters = semiMinorAxis * 1000;
+
+            Polygon ellipsePolygon = CreateEllipsePolygon(centerX, centerY, majorAxisMeters, minorAxisMeters, orientationAngle);
+
+            return new Layer("Error Ellipse")
+            {
+                DataSource = new MemoryProvider(ellipsePolygon.ToFeature()),
+                Style = new VectorStyle
+                {
+                    Fill = new Brush(Color.Red),
+                    Outline = new Pen(Color.Red, 2)
+                }
+            };
+        }
+
+
+        private static Polygon CreateEllipsePolygon(double centerX, double centerY, double majorAxis, double minorAxis, double orientation)
+        {
+            const int numPoints = 100;
+            var coordinates = new Coordinate[numPoints + 1];
+
+            double angleRadians = orientation * Math.PI / 180.0;
+            double cosAngle = Math.Cos(angleRadians);
+            double sinAngle = Math.Sin(angleRadians);
+
+            for (int i = 0; i < numPoints; i++)
+            {
+                double theta = 2.0 * Math.PI * i / numPoints;
+                double x = majorAxis * Math.Cos(theta);
+                double y = minorAxis * Math.Sin(theta);
+
+                // Rotate the ellipse
+                double rotatedX = cosAngle * x - sinAngle * y;
+                double rotatedY = sinAngle * x + cosAngle * y;
+
+                // Translate to the center point
+                coordinates[i] = new Coordinate(centerX + rotatedX, centerY + rotatedY);
+            }
+
+            // Close the ring
+            coordinates[numPoints] = coordinates[0];
+
+            var linearRing = new LinearRing(coordinates);
+            return new Polygon(linearRing);
+        }
 
     }
 }

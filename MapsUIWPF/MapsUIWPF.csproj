@@ -9,34 +9,27 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Windows\Images\Vaisala_Dig_logo.jpg" />
-    <None Remove="Windows\Taskbar\Icons\ZoomIn_Icon.png" />
-    <None Remove="Windows\Taskbar\Icons\ZoomOut_Icon.png" />
-    <None Remove="Windows\Taskbar\Icons\ZoomReset_Icon2.png" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Mapsui" Version="4.1.7" />
     <PackageReference Include="Mapsui.Wpf" Version="4.1.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Windows\Images\Vaisala_Dig_logo.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Windows\Taskbar\Icons\ZoomIn_Icon.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Windows\Taskbar\Icons\ZoomOut_Icon.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Windows\Taskbar\Icons\ZoomReset_Icon2.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    <Folder Include="Data\Events\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Events\" />
+    <None Update="Windows\Images\Vaisala_Dig_logo.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Windows\Taskbar\Icons\ZoomIn_Icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Windows\Taskbar\Icons\ZoomOut_Icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Windows\Taskbar\Icons\ZoomReset_Icon2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
