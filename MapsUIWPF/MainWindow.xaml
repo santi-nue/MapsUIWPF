@@ -65,7 +65,7 @@
             <!-- Right Panel: Layer Selector -->
             <StackPanel Grid.Column="2" Background="LightGray" VerticalAlignment="Stretch">
                 <TextBlock Text="Layers:" Margin="5"/>
-                <ListBox x:Name="LayerList" ItemsSource="{Binding Layers.Layers}" Margin="5"/>
+                <ListBox x:Name="LayerList" ItemsSource="{Binding Layers.Layers}" Margin="5" SelectionMode="Single"/>
             </StackPanel>
         </Grid>
     </DockPanel>

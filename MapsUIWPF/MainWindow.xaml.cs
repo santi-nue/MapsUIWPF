@@ -26,9 +26,6 @@ namespace MapsUIWPF
             InitializeComponent();
             DataContext = new MainWindowViewLists();
 
-            // Add some test data
-            ((MainWindowViewLists)DataContext).Layers.Layers.Add("Test Layer");
-            ((MainWindowViewLists)DataContext).ShapeFiles.ShapeFiles.Add("Test ShapeFile");
 
             // Initialize the map asynchronously
             InitializeMapAsync();
@@ -54,14 +51,16 @@ namespace MapsUIWPF
             map.Navigator.OverridePanBounds = worldBounds;
             map.Navigator.ZoomToBox(worldBounds);
 
-            // Create a layer for the ellipse marker over Colorado
-            var coloradoEllipseLayer = CreateColoradoEllipseLayer(map.Navigator.Viewport.Resolution);
-            map.Layers.Add(coloradoEllipseLayer);
-
+            
             // Add layer names to the LayersList
-            Layers.Layers.Add(tileLayer.Name ?? "Tile Layer");
-            Layers.Layers.Add(coloradoEllipseLayer.Name ?? "Colorado Ellipse Layer");
+            foreach(var layer in map.Layers)
+            {
+                MessageBox.Show($"Found layer: {layer.Name}");
 
+                if(layer.Name != null)
+                    Layers.Layers.Add(layer.Name);
+            }
+            
             // Attach event handler for map zoom changes
             map.Navigator.ViewportChanged += Event_ViewPortChanged;
 
@@ -150,64 +149,6 @@ namespace MapsUIWPF
         {
         }
 
-        private MemoryLayer CreateColoradoEllipseLayer(double initialResolution)
-        {
-            
-            // Define initial style for the ellipse marker
-            var ellipseStyle = CreateEllipseStyle(initialResolution);
-
-            // Coordinates roughly around Colorado
-            var (lonCenter, latCenter) = (-105.358887, 39.113014); // Center point of Colorado
-
-            // Convert center to spherical mercator coordinates
-            var (centerX, centerY) = SphericalMercator.FromLonLat(lonCenter, latCenter);
-
-            // Create a feature for the ellipse marker centered over Colorado
-            var ellipseFeature = new PointFeature(new MPoint(centerX, centerY))
-            {
-                Styles = new[] { ellipseStyle }
-            };
-
-            // Create the memory layer and set its features and name
-            var layer = new MemoryLayer
-            {
-                Name = "Colorado Ellipse",
-                Features = new List<IFeature> { ellipseFeature }
-            };
-
-            return layer;
-        }
-
-        private SymbolStyle CreateEllipseStyle(double resolution)
-        {
-            // Define a base size for the ellipse
-            double baseSize = 100000; // Adjust this base size as necessary
-            double scaleFactor = baseSize / resolution;
-
-            // Define the style for the ellipse marker
-            return new SymbolStyle
-            {
-                SymbolScale = scaleFactor, // Scaling factor based on resolution
-                Fill = new Brush(Color.FromArgb(128, 0, 0, 255)), // Blue color with 50% opacity
-                Outline = new Pen(Color.Black, 2)
-            };
-        }
-
-        private void UpdateEllipseSize(MemoryLayer ellipseLayer, double resolution)
-        {
-            // Update the ellipse's style based on the new resolution
-            foreach (var feature in ellipseLayer.Features)
-            {
-                if (feature.Styles.FirstOrDefault() is SymbolStyle ellipseStyle)
-                {
-                    double baseSize = 100000; // Same base size used in CreateEllipseStyle
-                    ellipseStyle.SymbolScale = baseSize / resolution; // Adjust scaling factor as needed
-                }
-            }
-
-            // Redraw the layer to reflect the style changes
-            ellipseLayer.DataHasChanged();
-        }
 
     }
 }
