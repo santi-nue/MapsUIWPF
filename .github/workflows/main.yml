@@ -23,7 +23,7 @@ jobs:
         run: dotnet restore --locked-mode --packages packs MapsUIWPF.sln
 
       - name: Build project
-        run: ./build solution
+        run: dotnet build
 
       - name: compress
         run: Compress-Archive . release.zip
